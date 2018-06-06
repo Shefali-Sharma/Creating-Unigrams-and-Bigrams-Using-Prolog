@@ -1,0 +1,80 @@
+
+# Converting all Uppercase to Lowercase
+tr ’A-Z’ ’a-z’ <DA.txt> DA_No_Cap.txt
+
+# Replacing all '.' with '@'
+sed 's/\./@/g' DA_No_Cap.txt > DA_No_Cap_Dots.txt 
+
+# Replacing all '!' with '@'
+sed 's/\!/@/g' DA_No_Cap_Dots.txt > DA_No_Cap_Dots_Ex.txt 
+
+# Replacing all '?' with '@'
+sed 's/\?/@/g' DA_No_Cap_Dots_Ex.txt > DA_No_Cap_Dots_Ex_Ques.txt 
+
+# Replacing all " with '@'
+sed 's/\"/@/g' DA_No_Cap_Dots_Ex_Ques.txt > DA_No_Cap_Dots_Ex_Ques_DoQ.txt
+
+# Replacing all 'i@' with 'i' to remove discrepancies of language (mentioned on Piazza)
+sed 's/i@/i/g' DA_No_Cap_Dots_Ex_Ques_DoQ.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct.txt 
+
+# Replacing all "m@ch@" with "mache"  to remove discrepancies of language
+sed "s/m@ch@/mache/g" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2.txt
+
+# Removing multiple (@@@)
+sed 's/@@@/@/g' DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple.txt 
+
+# Removing multiple (@@)
+sed 's/@@/@/g' DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double.txt
+sed 's/@@/@/g' DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double2.txt
+sed 's/@@/@/g' DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double2.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3.txt
+
+# Converting 's to is, n't to not, 've to have, 'd to would, 're to are, 'll to will, 'em to them and 'm to am
+sed -e "s/'s/ is/g" -e "s/n't/ not/g" -e "s/'ve/ have/g" -e "s/'d/ would/g" -e "s/'re/ are/g" -e "s/'ll/ will/g" -e "s/'em/ them/g" -e "s/'m/ am/g" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App.txt
+
+# Removing other Symbols such as (,), ;, :, %, -
+sed "s/[();:,%-]//g" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols.txt
+
+# Removing *
+sed "s/\*//g" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols_Star.txt
+
+# Removing '
+sed "s/\'//g" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols_Star.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols_Star_quo.txt
+
+# Putting space around @
+sed "s/@/ @ /g" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols_Star_quo.txt > DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols_Star_quo_atSpace.txt
+
+# Place unigrams in unigram.txt
+egrep -o "[a-z@]+" DA_No_Cap_Dots_Ex_Ques_DoQ_Correct2_Triple_Double3_App_Symbols_Star_quo_atSpace.txt > unigram.txt
+
+# Create a file unig2.txt from Unigram.txt to create pairs
+tail -n+2 unigram.txt > unig2.txt
+
+# Creating pairs using the two files
+paste unigram.txt unig2.txt > pairs.txt
+
+# Sorting the pairs to get the highest valued bigram at the top
+sort < pairs.txt | uniq -c | sort -n -r > bigrams.txt
+
+# Removing tabs to form bigrams
+tr '\t' ',' < bigrams.txt > bigrams_no_tabs.txt
+
+# Removing extra space from the front
+sed "s/^[ \t]*//" bigrams_no_tabs.txt > bigrams_no_tabs_space.txt
+
+# Adding 'bigram(' at the front to make it to prolog readable format
+sed 's/^/bigram(/' bigrams_no_tabs_space.txt > bigrams_no_tabs_space_addBigram.txt
+
+# Replacing space with comma
+sed "s/ /,/g" bigrams_no_tabs_space_addBigram.txt > bigrams_no_tabs_space_addBigram_comma.txt
+
+# Add ').' at the end of each line and Create final .pl file
+sed 's/$/)./' bigrams_no_tabs_space_addBigram_comma.txt > bigram_sharma92.pl
+
+# Do sorting for Unigrams too
+sort < unigram.txt | uniq -c | sort -n -r > UnigramsNums.txt
+
+#Repeating the same procedure as Bigrams to crete unigram_sharma92.pl file
+sed "s/^[ \t]*//" UnigramsNums.txt > UnigramsNums_No_space.txt
+sed 's/^/unigram(/' UnigramsNums_No_space.txt > UnigramsNums_No_space_addUnigram.txt
+sed "s/ /,/g" UnigramsNums_No_space_addUnigram.txt > UnigramsNums_No_space_addUnigram_comma.txt
+sed 's/$/)./' UnigramsNums_No_space_addUnigram_comma.txt > unigram_sharma92.pl
